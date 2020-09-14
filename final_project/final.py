@@ -40,7 +40,7 @@ class Visual_BOW():
         filepath = "./101_ObjectCategories"
         
         i = 0
-        for category in os.listdir(filepath)[:self.dictionary_size]: 
+        for category in os.listdir(filepath): 
             if(category != ".DS_Store"):
                 for jpg in os.listdir(filepath + "/" + category):
 
@@ -95,7 +95,7 @@ class Visual_BOW():
             for kp in features[i]:
                 flat_features.append(kp)
                 
-        kmeans = KMeans(n_clusters = self.dictionary_size).fit(flat_features)
+        kmeans = MiniBatchKMeans(n_clusters = self.dictionary_size, random_state=0).fit(flat_features)
         
         return kmeans
 
@@ -223,9 +223,12 @@ class Visual_BOW():
         # DO NOT MODIFY THIS FUNCTION
         accuracy = 0.0
         for i in range(self.n_tests):
+            print(i)
             train_features, train_labels, test_features, test_labels = self.extract_sift_features()
             kmeans = self.create_dictionary(train_features)
+            print("trained kmean")
             train_features_new = self.convert_features_using_dictionary(kmeans, train_features)
+            print("done prep")
             classifier = self.train_svm(train_features_new, train_labels)
             test_features_new = self.convert_features_using_dictionary(kmeans, test_features)
             accuracy += self.test_svm(classifier, test_features_new, test_labels)
@@ -233,7 +236,7 @@ class Visual_BOW():
         accuracy /= self.n_tests
         return accuracy
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     alg = Visual_BOW(k=20, dictionary_size=30)
     accuracy = alg.algorithm()
     print("Final accuracy of the model is:", accuracy)
